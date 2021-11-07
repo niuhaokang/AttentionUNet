@@ -25,11 +25,11 @@ def requires_grad(model, flag=True):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', type=str, default='sketch')
-    parser.add_argument('--data_root', type=str, default='/data/haokang/Semi-Supervisied-DataSet/sketch')
+    parser.add_argument('--data_root', type=str, default='/data/haokang/Semi-Supervisied-DataSet/cartoon')
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--resolution', type=int, default=256)
 
-    parser.add_argument('--epoch', type=int, default=15)
+    parser.add_argument('--epoch', type=int, default=50)
     parser.add_argument('--save_img_epoch', type=int, default=1)
     parser.add_argument('--save_model_epoch', type=int, default=10)
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
-    device = 'cuda:0'
+    device = 'cuda:1'
 
     assert args.name
     if not os.path.exists('./result'):
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     P = PatchSampleF().to(device)
 
     # Loss items
-    criterionGAN = GANLoss(use_lsgan=True, tensor=torch.cuda.FloatTensor)
+    criterionGAN = GANLoss(use_lsgan=True, tensor=torch.cuda.FloatTensor, device=device)
     criterionFeat = torch.nn.L1Loss()
     criterionVGG = VGGLoss(device=device)
     criterionl2 = torch.nn.MSELoss()
@@ -261,3 +261,6 @@ if __name__ == '__main__':
                     range=(-1, 1),
                 )
                 count += 1
+    torch.save({
+        "g": G.state_dict()
+    }, os.path.join(args.result_checkpoints, args.name + '.pt'))
